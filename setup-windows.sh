@@ -3,7 +3,11 @@
 # (Re)Download VirtIO Driver ISO (to get the latest version)
 echo "Downloading VirtIO Driver ISO..."
 rm -f virtio-win-latest.iso
-curl -o virtio-win-latest.iso https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso
+curl -L -o virtio-win-latest.iso https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso
+
+echo "Copying UEFI Variables File..."
+rm -f OVMF_VARS.4m.fd
+cp /usr/share/edk2/x64/OVMF_VARS.4m.fd OVMF_VARS.4m.fd
 
 # If we are on BTRFS we need to use the nodatacow option when creating the image
 # See https://wiki.archlinux.org/title/QEMU#Creating_new_virtualized_system
@@ -70,6 +74,8 @@ qemu-system-x86_64 \
 -enable-kvm \
 -smp 8 \
 -m 8G \
+-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+-drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
 -drive file=DriveC.qcow2,if=virtio,cache=writeback \
 -drive file=virtio-win-latest.iso,media=cdrom \
 $install_iso \
